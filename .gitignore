@@ -1,0 +1,7 @@
+# JetBrains IDEs
+.idea
+
+# Terraform / OpenTofu
+.terraform
+*terraform.tfstate*
+*terraform.tfplan*
