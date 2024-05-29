@@ -3,10 +3,18 @@ resource "aws_vpc" "vpc" {
 
   enable_dns_support   = true
   enable_dns_hostnames = true
+
+  tags = {
+    Name = module.vpc_name.name
+  }
 }
 
 resource "aws_internet_gateway" "vpc" {
   vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${module.vpc_name.name}-public"
+  }
 }
 
 resource "aws_subnet" "public" {
@@ -15,6 +23,10 @@ resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = each.value.cidr_block
   availability_zone = each.value.availability_zone
+
+  tags = {
+    Name = "${module.vpc_name.name}-public-${each.value.availability_zone}"
+  }
 }
 
 resource "aws_route_table" "public" {
@@ -23,6 +35,10 @@ resource "aws_route_table" "public" {
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.vpc.id
+  }
+
+  tags = {
+    Name = "${module.vpc_name.name}-public"
   }
 }
 
@@ -39,7 +55,32 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = each.value.cidr_block
   availability_zone = each.value.availability_zone
+
+  tags = {
+    Name = "${module.vpc_name.name}-private-${each.value.availability_zone}"
+  }
 }
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${module.vpc_name.name}-private"
+  }
+}
+
+resource "aws_main_route_table_association" "a" {
+  vpc_id         = aws_vpc.vpc.id
+  route_table_id = aws_route_table.private.id
+}
+
+resource "aws_route_table_association" "private" {
+  for_each = aws_subnet.private
+
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private.id
+}
+
 
 # Commented out because $$$$$$
 #

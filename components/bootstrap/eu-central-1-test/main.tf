@@ -1,4 +1,4 @@
-module "bootstrap" {
+module "base" {
   source = "../base"
 
   region      = var.region
