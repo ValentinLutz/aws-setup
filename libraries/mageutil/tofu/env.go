@@ -12,15 +12,23 @@ type StageProps struct {
 
 func getStageEnvVars() StageProps {
 	return StageProps{
-		Region:      getEnvValueOrPanic("REGION"),
-		Environment: getEnvValueOrPanic("ENVIRONMENT"),
+		Region:      getEnvValueOrWaitForInput("REGION", "eu-central-1"),
+		Environment: getEnvValueOrWaitForInput("ENVIRONMENT", "test"),
 	}
 }
 
-func getEnvValueOrPanic(key string) string {
+func getEnvValueOrWaitForInput(key string, defaultValue string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		panic(fmt.Sprintf("env '%s' not set", key))
+		fmt.Printf("%s [%s]: ", key, defaultValue)
+
+		var input string
+		_, err := fmt.Scanln(&input)
+		if err != nil {
+			return defaultValue
+		}
+
+		return input
 	}
 	return value
 }
