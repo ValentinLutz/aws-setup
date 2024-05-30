@@ -1,8 +1,7 @@
 package tofu
 
 import (
-	"fmt"
-	"os"
+	"root/libraries/mageutil"
 )
 
 type StageProps struct {
@@ -12,23 +11,7 @@ type StageProps struct {
 
 func getStageEnvVars() StageProps {
 	return StageProps{
-		Region:      getEnvValueOrWaitForInput("REGION", "eu-central-1"),
-		Environment: getEnvValueOrWaitForInput("ENVIRONMENT", "test"),
+		Region:      mageutil.GetEnvValueOrWaitForInput("REGION", "eu-central-1"),
+		Environment: mageutil.GetEnvValueOrWaitForInput("ENVIRONMENT", "test"),
 	}
-}
-
-func getEnvValueOrWaitForInput(key string, defaultValue string) string {
-	value, ok := os.LookupEnv(key)
-	if !ok {
-		fmt.Printf("%s [%s]: ", key, defaultValue)
-
-		var input string
-		_, err := fmt.Scanln(&input)
-		if err != nil {
-			return defaultValue
-		}
-
-		return input
-	}
-	return value
 }
