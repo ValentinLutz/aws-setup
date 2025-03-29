@@ -1,0 +1,23 @@
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+      command     = "aws"
+    }
+  }
+}
+
+resource "helm_release" "argocd" {
+  depends_on = [module.eks]
+
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = "7.8.15"
+
+  namespace        = "argocd"
+  create_namespace = true
+}
